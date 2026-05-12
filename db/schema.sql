@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(64) UNIQUE NOT NULL,
+  name VARCHAR(128) NOT NULL,
+  email VARCHAR(128) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  github_profile VARCHAR(255),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  github_url VARCHAR(512) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);

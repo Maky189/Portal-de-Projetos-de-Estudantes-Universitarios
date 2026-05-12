@@ -1,17 +1,15 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+require('dotenv').config();
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
+const usersRouter = require('./routes/users');
+const projectsRouter = require('./routes/projects');
 
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -19,23 +17,33 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Portal de Projetos de Estudantes Universitarios API',
+    version: '1.0.0',
+    endpoints: {
+      'POST   /auth/register': 'register a new user',
+      'POST   /auth/login': 'login and obtain a JWT',
+      'GET    /auth/me': 'current authenticated user (requires Bearer token)',
+      'GET    /users': 'list users',
+      'GET    /users/:id/projects': 'list projects of a user',
+      'GET    /projects': 'list all projects (public)',
+      'GET    /projects/:id': 'get a project by id',
+      'POST   /projects': 'create a project (auth required)',
+      'PUT    /projects/:id': 'update own project (auth required)',
+      'DELETE /projects/:id': 'delete own project (auth required)',
+    },
+  });
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use('/auth', authRouter);
+app.use('/users', usersRouter);
+app.use('/projects', projectsRouter);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+app.use((req, res, next) => next(createError(404)));
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
 });
 
 module.exports = app;

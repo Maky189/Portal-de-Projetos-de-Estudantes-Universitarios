@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-portal}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      POSTGRES_DB: ${DB_NAME:-portal}
+    volumes:
+      - portal_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-portal} -d ${DB_NAME:-portal}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: ${PORT:-3000}
+      NODE_ENV: ${NODE_ENV:-production}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-portal}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      DB_NAME: ${DB_NAME:-portal}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
+      SEED_PASSWORD: ${SEED_PASSWORD:?SEED_PASSWORD must be set in .env}
+    ports:
+      - "${PORT:-3000}:3000"
+
+volumes:
+  portal_pgdata:

@@ -17,8 +17,22 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
-# dotenv environment variables file
+# dotenv environment variables files (never commit real secrets)
 .env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+# allow the template
+!.env.example
+
+# Secrets / keys
+*.pem
+*.key
+*.crt
+secrets/
+*.secret
 
 # OS generated files
 .DS_Store
