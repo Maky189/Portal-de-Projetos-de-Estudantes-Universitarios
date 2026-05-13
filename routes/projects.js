@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, authOptional } = require('../middleware/auth');
 
 const GITHUB_URL_RE = /^https?:\/\/(www\.)?github\.com\/[^\/\s]+\/[^\/\s]+\/?$/i;
 
@@ -19,14 +19,22 @@ function validate(body, { partial = false } = {}) {
   return errors;
 }
 
-router.get('/', async (req, res, next) => {
+router.get('/', authOptional, async (req, res, next) => {
   try {
+    const params = [];
+    let where = '';
+    if (req.user) {
+      where = 'WHERE p.user_id = $1';
+      params.push(req.user.id);
+    }
     const { rows } = await query(
       `SELECT p.id, p.title, p.description, p.github_url, p.created_at, p.updated_at,
               u.id AS author_id, u.username AS author_username, u.name AS author_name
          FROM projects p
          JOIN users u ON u.id = p.user_id
-       ORDER BY p.id`,
+         ${where}
+        ORDER BY p.id`,
+      params,
     );
     res.json(rows);
   } catch (err) {

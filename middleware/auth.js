@@ -15,6 +15,17 @@ function authRequired(req, res, next) {
   }
 }
 
+function authOptional(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : req.cookies && req.cookies.token;
+  if (!token) return next();
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = { id: payload.sub, username: payload.username };
+  } catch (err) { /* ignore invalid token */ }
+  next();
+}
+
 function signToken(user) {
   return jwt.sign(
     { sub: user.id, username: user.username },
@@ -23,4 +34,4 @@ function signToken(user) {
   );
 }
 
-module.exports = { authRequired, signToken, JWT_SECRET };
+module.exports = { authRequired, authOptional, signToken, JWT_SECRET };

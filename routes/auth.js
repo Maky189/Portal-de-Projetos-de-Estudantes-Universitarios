@@ -3,18 +3,27 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const { query } = require('../db');
 const { signToken, authRequired } = require('../middleware/auth');
+const { extractUsername } = require('../lib/github');
 
 router.post('/register', async (req, res, next) => {
   try {
     const { username, name, email, password, githubProfile } = req.body || {};
-    if (!username || !name || !email || !password) {
-      return res.status(400).json({ error: 'username, name, email and password are required' });
+    if (!username || !name || !email || !password || !githubProfile) {
+      return res.status(400).json({
+        error: 'username, name, email, password and githubProfile are required',
+      });
     }
+    if (!extractUsername(githubProfile)) {
+      return res.status(400).json({
+        error: 'githubProfile must be a valid GitHub profile URL (e.g. https://github.com/your-user)',
+      });
+    }
+
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await query(
       `INSERT INTO users (username, name, email, password_hash, github_profile)
        VALUES ($1,$2,$3,$4,$5) RETURNING id, username, name, email, github_profile`,
-      [username, name, email, hash, githubProfile || null],
+      [username, name, email, hash, githubProfile],
     );
     const user = rows[0];
     const token = signToken(user);

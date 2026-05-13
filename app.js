@@ -15,19 +15,29 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    if (process.env.NODE_ENV !== 'production') {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  },
+}));
 
 app.get('/', (req, res) => {
   res.json({
     name: 'Portal de Projetos de Estudantes Universitarios API',
     version: '1.0.0',
     endpoints: {
-      'POST   /auth/register': 'register a new user',
+      'POST   /auth/register': 'register a new user (githubProfile required; imports public repos)',
       'POST   /auth/login': 'login and obtain a JWT',
       'GET    /auth/me': 'current authenticated user (requires Bearer token)',
       'GET    /users': 'list users',
-      'GET    /users/:id/projects': 'list projects of a user',
-      'GET    /projects': 'list all projects (public)',
+      'GET    /users/:id/projects': 'list projects of a specific user',
+      'GET    /projects': 'list projects of the authenticated user (auth required)',
       'GET    /projects/:id': 'get a project by id',
       'POST   /projects': 'create a project (auth required)',
       'PUT    /projects/:id': 'update own project (auth required)',
