@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Projetos</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <h1>🎓 Portal de Projetos</h1>
+      </div>
+      <div class="nav-menu" id="navMenu">
+        <button class="nav-link" onclick="showPage('projects')">Projetos</button>
+        <button class="nav-link" id="authBtn" onclick="handleAuthClick()">Login</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Login/Register Page -->
+    <div id="authPage" class="page hidden">
+      <div class="auth-container">
+        <div class="auth-card">
+          <h2 id="authTitle">Login</h2>
+          <form id="authForm" onsubmit="handleAuthSubmit(event)">
+            <input type="text" id="username" placeholder="Usuário ou Email" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <div id="registerFields" class="hidden">
+              <input type="text" id="name" placeholder="Nome Completo">
+              <input type="email" id="email" placeholder="Email">
+              <input type="text" id="githubProfile" placeholder="Perfil GitHub (opcional)">
+            </div>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+            <p id="authToggle">
+              Não tem conta? <a href="#" onclick="toggleAuth(event)">Registre-se</a>
+            </p>
+          </form>
+          <div id="authError" class="error-message"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects Page -->
+    <div id="projectsPage" class="page">
+      <div class="projects-header">
+        <h2>Projetos</h2>
+        <button id="createProjectBtn" class="btn btn-primary hidden" onclick="showPage('createProject')">
+          + Novo Projeto
+        </button>
+      </div>
+
+      <div id="projectsList" class="projects-grid">
+        <!-- Projects will be loaded here -->
+      </div>
+    </div>
+
+    <!-- Create/Edit Project Page -->
+    <div id="createProjectPage" class="page hidden">
+      <div class="form-container">
+        <h2 id="projectFormTitle">Novo Projeto</h2>
+        <form id="projectForm" onsubmit="handleProjectSubmit(event)">
+          <input type="hidden" id="projectId">
+          
+          <div class="form-group">
+            <label for="projectTitle">Título *</label>
+            <input type="text" id="projectTitle" placeholder="Título do projeto" required>
+          </div>
+
+          <div class="form-group">
+            <label for="projectDescription">Descrição</label>
+            <textarea id="projectDescription" placeholder="Descrição do projeto" rows="4"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="projectGithubUrl">URL do GitHub *</label>
+            <input type="url" id="projectGithubUrl" placeholder="https://github.com/usuario/repositorio" required>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitProjectBtn">Salvar Projeto</button>
+            <button type="button" class="btn btn-secondary" onclick="showPage('projects')">Cancelar</button>
+            <button type="button" id="deleteProjectBtn" class="btn btn-danger hidden" onclick="handleProjectDelete()">
+              Deletar Projeto
+            </button>
+          </div>
+        </form>
+        <div id="projectError" class="error-message"></div>
+      </div>
+    </div>
+
+    <!-- User Profile Page -->
+    <div id="profilePage" class="page hidden">
+      <div class="profile-container">
+        <h2>Meu Perfil</h2>
+        <div class="profile-card">
+          <p><strong>Usuário:</strong> <span id="profileUsername"></span></p>
+          <p><strong>Nome:</strong> <span id="profileName"></span></p>
+          <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+          <p><strong>GitHub:</strong> <span id="profileGithub"></span></p>
+          <p><strong>Membro desde:</strong> <span id="profileCreatedAt"></span></p>
+          <div class="profile-actions">
+            <button class="btn btn-danger" onclick="handleLogout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
